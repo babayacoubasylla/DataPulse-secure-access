@@ -63,9 +63,10 @@ export const api = {
 
   currentSubscription: () => request('/api/subscriptions/current'),
 
-  // Billing
+  // Billing client
   billingInvoices: () => request('/api/billing/invoices'),
 
+  // Billing admin
   billingAdminSummary: () => request('/api/billing/admin/summary'),
 
   billingAdminInvoices: () => request('/api/billing/admin/invoices'),
@@ -101,6 +102,26 @@ export const api = {
     request(`/api/admin/organizations/${id}/status`, {
       method: 'PUT',
       body: JSON.stringify(payload),
+    }),
+
+  // Team
+  teamMembers: () => request('/api/team'),
+
+  createTeamMember: (payload) =>
+    request('/api/team', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  updateTeamMember: (id, payload) =>
+    request(`/api/team/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    }),
+
+  deactivateTeamMember: (id) =>
+    request(`/api/team/${id}`, {
+      method: 'DELETE',
     }),
 
   // Scraping
