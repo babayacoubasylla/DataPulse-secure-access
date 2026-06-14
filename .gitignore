@@ -1,0 +1,41 @@
+# Node / frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/.env
+frontend/.env.local
+frontend/.env.production
+
+# Python / backend
+backend/.venv/
+backend/__pycache__/
+backend/app/__pycache__/
+backend/app/routers/__pycache__/
+backend/*.pyc
+backend/datapulse.db
+backend/.env
+
+# General Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build/cache
+.cache/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
