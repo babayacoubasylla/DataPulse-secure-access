@@ -10,20 +10,12 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
+from .config import settings
 from .database import get_db
 from .models import User
 
 
-JWT_SECRET_KEY = os.getenv(
-    "JWT_SECRET_KEY",
-    "change-this-secret-key-in-production"
-)
-
 JWT_ALGORITHM = "HS256"
-
-ACCESS_TOKEN_EXPIRE_MINUTES = int(
-    os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440")
-)
 
 bearer_scheme = HTTPBearer(auto_error=False)
 
@@ -71,10 +63,10 @@ def verify_password(password: str, stored_hash: str) -> bool:
 
 def create_access_token(
     subject: str,
-    extra_data: dict[str, Any] | None = None
+    extra_data: dict[str, Any] | None = None,
 ) -> str:
     expires_at = datetime.now(timezone.utc) + timedelta(
-        minutes=ACCESS_TOKEN_EXPIRE_MINUTES
+        minutes=settings.access_token_expire_minutes
     )
 
     payload = {
@@ -88,7 +80,7 @@ def create_access_token(
 
     return jwt.encode(
         payload,
-        JWT_SECRET_KEY,
+        settings.jwt_secret_key,
         algorithm=JWT_ALGORITHM,
     )
 
@@ -97,7 +89,7 @@ def decode_access_token(token: str) -> dict[str, Any]:
     try:
         return jwt.decode(
             token,
-            JWT_SECRET_KEY,
+            settings.jwt_secret_key,
             algorithms=[JWT_ALGORITHM],
         )
 
@@ -125,7 +117,6 @@ def get_current_user(
         )
 
     payload = decode_access_token(credentials.credentials)
-
     user_id = payload.get("sub")
 
     if not user_id:

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from ..config import settings
 from ..database import get_db
 from ..models import Organization, User
 from ..schemas import AuthResponse, LoginRequest, RegisterRequest, UserOut
@@ -26,15 +27,27 @@ def build_auth_response(user: User) -> AuthResponse:
     )
 
 
+def get_role_for_new_user(email: str) -> str:
+    if (
+        settings.platform_admin_email
+        and email.lower() == settings.platform_admin_email.lower()
+    ):
+        return "platform_admin"
+
+    return "owner"
+
+
 @router.post(
     "/register",
     response_model=AuthResponse,
     status_code=status.HTTP_201_CREATED,
 )
 def register(payload: RegisterRequest, db: Session = Depends(get_db)):
+    email = payload.email.lower()
+
     existing_user = (
         db.query(User)
-        .filter(User.email == payload.email.lower())
+        .filter(User.email == email)
         .first()
     )
 
@@ -47,7 +60,7 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)):
     organization = Organization(
         name=payload.organization_name,
         industry=payload.industry,
-        email=payload.email.lower(),
+        email=email,
     )
 
     db.add(organization)
@@ -56,9 +69,9 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)):
     user = User(
         organization_id=organization.id,
         full_name=payload.full_name,
-        email=payload.email.lower(),
+        email=email,
         password_hash=hash_password(payload.password),
-        role="owner",
+        role=get_role_for_new_user(email),
         is_active=True,
     )
 
@@ -75,9 +88,11 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)):
 
 @router.post("/login", response_model=AuthResponse)
 def login(payload: LoginRequest, db: Session = Depends(get_db)):
+    email = payload.email.lower()
+
     user = (
         db.query(User)
-        .filter(User.email == payload.email.lower())
+        .filter(User.email == email)
         .first()
     )
 
