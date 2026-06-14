@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: datapulse-api
+    env: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: APP_ENV
+        value: production
+
+      - key: FRONTEND_URL
+        value: https://impact360walk.netlify.app
+
+      - key: JWT_SECRET_KEY
+        generateValue: true
+
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: 1440
+
+      - key: PLATFORM_ADMIN_EMAIL
+        value: admin@datapulse.com
+
+      - key: DATABASE_URL
+        sync: false
